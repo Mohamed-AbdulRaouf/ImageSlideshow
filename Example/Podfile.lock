@@ -23,7 +23,7 @@ PODS:
     - AFNetworking (~> 3.0)
     - ImageSlideshow/Core
   - ImageSlideshow/Alamofire (1.9.3):
-    - AlamofireImage (~> 4.0)
+    - AlamofireImage
     - ImageSlideshow/Core
   - ImageSlideshow/Core (1.9.3)
   - ImageSlideshow/Kingfisher (1.9.3):
@@ -31,7 +31,7 @@ PODS:
     - Kingfisher (> 3.0)
   - ImageSlideshow/SDWebImage (1.9.3):
     - ImageSlideshow/Core
-    - SDWebImage (>= 3.7)
+    - SDWebImage
   - Kingfisher (5.14.0):
     - Kingfisher/Core (= 5.14.0)
   - Kingfisher/Core (5.14.0)
@@ -62,10 +62,10 @@ SPEC CHECKSUMS:
   AFNetworking: cb604b1c2bded0871f5f61f5d53653739e841d6b
   Alamofire: e911732990610fe89af59ac0077f923d72dc3dfd
   AlamofireImage: c4a2ba349885fb3064feb74d2e547bd42ce9be10
-  ImageSlideshow: 5dc3b4b5312ea49fbe322c4bdce7c1116591b34a
+  ImageSlideshow: 88f41d5d8a83ed2291c0254a62ea8def392d31ae
   Kingfisher: 7b64389a43139c903ec434788344c288217c792d
   SDWebImage: e3eae2eda88578db0685a0c88597fdadd9433f05
 
-PODFILE CHECKSUM: 46015634277c8c8bfd78d1b363e41ea2dfd179d9
+PODFILE CHECKSUM: 19810162c1a79de96d3684e707a993a0b605e6d7
 
 COCOAPODS: 1.15.2
