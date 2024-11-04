@@ -50,7 +50,7 @@ Image slideshow is a Swift library providing customizable image slideshow with c
 
   s.subspec 'Alamofire' do |subspec|
     subspec.dependency 'ImageSlideshow/Core'
-    subspec.dependency 'AlamofireImage', '~> 4.3.0'
+    subspec.dependency 'AlamofireImage', '~> 5.8'
     subspec.platform     = :ios, '12.0'
     subspec.source_files = 'ImageSlideshow/Classes/InputSources/AlamofireSource.swift'
   end
