@@ -74,14 +74,11 @@ open class ImageSlideshow: UIView {
         }
     }
 
-    open var pageIndicator: PageIndicatorView? {
+    open var pageIndicator: PageIndicatorView? = UIPageControl() {
         didSet {
             oldValue?.view.removeFromSuperview()
             if let pageIndicator = pageIndicator {
                 addSubview(pageIndicator.view)
-                if let pageIndicator = pageIndicator as? UIControl {
-                    pageIndicator.addTarget(self, action: #selector(pageControlValueChanged), for: .valueChanged)
-                }
             }
             setNeedsLayout()
         }
@@ -117,7 +114,6 @@ open class ImageSlideshow: UIView {
     open fileprivate(set) var currentPage: Int = 0 {
         didSet {
             if oldValue != currentPage {
-                pageIndicator?.page = currentPage
                 currentPageChanged?(currentPage)
                 delegate?.imageSlideshow?(self, didChangeCurrentPageTo: currentPage)
             }
@@ -128,13 +124,13 @@ open class ImageSlideshow: UIView {
     open weak var delegate: ImageSlideshowDelegate?
 
     /// Called on each currentPage change
-    open var currentPageChanged: ((_ page: Int) -> Void)?
+    open var currentPageChanged: ((_ page: Int) -> ())?
 
     /// Called on scrollViewWillBeginDragging
-    open var willBeginDragging: (() -> Void)?
+    open var willBeginDragging: (() -> ())?
 
     /// Called on scrollViewDidEndDecelerating
-    open var didEndDecelerating: (() -> Void)?
+    open var didEndDecelerating: (() -> ())?
 
     /// Currenlty displayed slideshow item
     open var currentSlideshowItem: ImageSlideshowItem? {
@@ -178,7 +174,7 @@ open class ImageSlideshow: UIView {
             reloadScrollView()
         }
     }
-
+    
     /// Maximum zoom scale
     open var maximumScale: CGFloat = 2.0 {
         didSet {
@@ -212,9 +208,9 @@ open class ImageSlideshow: UIView {
     fileprivate var isAnimating: Bool = false
 
     /// Transitioning delegate to manage the transition to full screen controller
-    open fileprivate(set) var slideshowTransitioningDelegate: ZoomAnimatedTransitioningDelegate? // swiftlint:disable:this weak_delegate
-
-    private var primaryVisiblePage: Int {
+    open fileprivate(set) var slideshowTransitioningDelegate: ZoomAnimatedTransitioningDelegate?
+    
+    var primaryVisiblePage: Int {
         return scrollView.frame.size.width > 0 ? Int(scrollView.contentOffset.x + scrollView.frame.size.width / 2) / Int(scrollView.frame.size.width) : 0
     }
 
@@ -237,9 +233,6 @@ open class ImageSlideshow: UIView {
     fileprivate func initialize() {
         autoresizesSubviews = true
         clipsToBounds = true
-        if #available(iOS 13.0, *) {
-            backgroundColor = .systemBackground
-        }
 
         // scroll view configuration
         scrollView.frame = CGRect(x: 0, y: 0, width: frame.size.width, height: frame.size.height - 50.0)
@@ -258,8 +251,12 @@ open class ImageSlideshow: UIView {
         }
         addSubview(scrollView)
 
-        if pageIndicator == nil {
-            pageIndicator = UIPageControl()
+        if let pageIndicator = pageIndicator {
+            addSubview(pageIndicator.view)
+        }
+        
+        if let pageIndicator = pageIndicator as? UIControl {
+            pageIndicator.addTarget(self, action: #selector(pageControlValueChanged), for: .valueChanged)
         }
 
         setTimerIfNeeded()
@@ -429,7 +426,7 @@ open class ImageSlideshow: UIView {
         }
     }
 
-    func slideshowTick(_ timer: Timer) {
+    @objc func slideshowTick(_ timer: Timer) {
         let page = scrollView.frame.size.width > 0 ? Int(scrollView.contentOffset.x / scrollView.frame.size.width) : 0
         var nextPage = page + 1
 
@@ -454,7 +451,7 @@ open class ImageSlideshow: UIView {
         scrollViewPage = page
         currentPage = currentPageForScrollViewPage(page)
     }
-
+    
     fileprivate func currentPageForScrollViewPage(_ page: Int) -> Int {
         if circular {
             if page == 0 {
@@ -540,7 +537,7 @@ open class ImageSlideshow: UIView {
      - returns: FullScreenSlideshowViewController instance
      */
     @discardableResult
-    open func presentFullScreenController(from controller: UIViewController, completion: (() -> Void)? = nil) -> FullScreenSlideshowViewController {
+    open func presentFullScreenController(from controller: UIViewController) -> FullScreenSlideshowViewController {
         let fullscreen = FullScreenSlideshowViewController()
         fullscreen.pageSelected = {[weak self] (page: Int) in
             self?.setCurrentPage(page, animated: false)
@@ -550,8 +547,7 @@ open class ImageSlideshow: UIView {
         fullscreen.inputs = images
         slideshowTransitioningDelegate = ZoomAnimatedTransitioningDelegate(slideshowView: self, slideshowController: fullscreen)
         fullscreen.transitioningDelegate = slideshowTransitioningDelegate
-        fullscreen.modalPresentationStyle = .custom
-        controller.present(fullscreen, animated: true, completion: completion)
+        controller.present(fullscreen, animated: true, completion: nil)
 
         return fullscreen
     }
@@ -588,11 +584,7 @@ extension ImageSlideshow: UIScrollViewDelegate {
             }
         }
 
-        // Updates the page indicator as the user scrolls (#204). Not called when not dragging to prevent flickers
-        // when interacting with PageControl directly (#376).
-        if scrollView.isDragging {
-            pageIndicator?.page = currentPageForScrollViewPage(primaryVisiblePage)
-        }
+        pageIndicator?.page = currentPageForScrollViewPage(primaryVisiblePage)
     }
 
     public func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
